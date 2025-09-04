@@ -1,374 +1,436 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { FaBars, FaTimes, FaSun, FaMoon, FaChevronDown } from "react-icons/fa";
-import { IoSunnyOutline } from "react-icons/io5";
-import { CiHome } from "react-icons/ci";
-import { MdOutlineSettings } from "react-icons/md";
-import { CgProfile } from "react-icons/cg";
+import React, { useEffect, useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import brand from "../assets/brand.png"
 import logo from "../assets/logo.jpeg";
-import { useTheme } from "../context/ThemeContext";
+import {
+  FaBars as Menu,
+  FaTimes as X,
+  FaSearch as Search,
+  FaChevronDown as ChevronDown,
+  FaChevronRight,
+} from "react-icons/fa";
 
-const NavLink = ({ to, children }) => {
-  const { tokens } = useTheme();
+
+//  NAVIGATION DATA
+ 
+
+const NAV_LINKS = [
+  {
+    label: "What we do",
+    id: "what-we-do",
+    dropdown: {
+      categories: [
+        {
+          title: "Adaptive Enterprise",
+          content: {
+            heading: "Adaptability is the new edge",
+            text: `We empower businesses to stay future-ready by enabling them to evolve with confidence in a fast-changing digital landscape.`,
+            button: "Start Adapting",
+          },
+        },
+        {
+          title: "Industries",
+          submenu: [
+            "Banking & Finance",
+            "Capital Markets",
+            "Consumer Goods",
+            "Media & Communications",
+            "Education",
+            "Energy & Utilities",
+            "Healthcare",
+            "High Tech",
+            "Insurance",
+            "Life Sciences",
+            "Manufacturing",
+            "Public Services",
+            "Retail",
+            "Travel & Logistics",
+          ],
+        },
+        {
+          title: "Services",
+          submenu: [
+            "Artificial Intelligence & Analytics",
+            "Cloud Transformation",
+            "Consulting & Advisory",
+            "Cybersecurity",
+            "Enterprise Platforms",
+            "IoT & Digital Engineering",
+            "Network Services",
+            "Sustainability Solutions",
+          ],
+        },
+        {
+          title: "Products & Platforms",
+          submenu: [
+            "MyBrand Insights™",
+            "MyBrand Finance™",
+            "MyBrand HR™",
+            "MyBrand CX Suite™",
+            "MyBrand AI Ops™",
+            "MyBrand Learn™",
+            "MyBrand Commerce™",
+            "MyBrand Retail Optimizer™",
+            "Smart Ledger™",
+          ],
+        },
+        {
+          title: "Research & Innovation",
+          submenu: ["MyBrand Labs", "MyBrand Accelerator™"],
+        },
+        { title: "Alliances" },
+      ],
+      content: {
+        heading: "Your Digital Growth Partner",
+        text: `From strategy to execution, MyBrand helps organizations innovate, adapt, and achieve long-term growth.`,
+        button: "Explore Our Work",
+      },
+    },
+  },
+  {
+    label: "Who we are",
+    id: "who-we-are",
+    dropdown: {
+      categories: [
+        { title: "About MyBrand" },
+        { title: "Our Identity" },
+        { title: "Leadership Team" },
+        { title: "Community Impact" },
+        { title: "Sustainability Vision" },
+        { title: "Diversity & Inclusion" },
+        { title: "Our Core Values" },
+      ],
+      content: {
+        heading: "Our Journey",
+        text: `We are a passionate team committed to building solutions that create value for people, businesses, and communities across the globe.`,
+        button: "Learn More",
+      },
+    },
+  },
+  {
+    label: "Insights",
+    id: "insights",
+    dropdown: {
+      categories: [
+        { title: "Case Studies" },
+        { title: "Events & Webinars" },
+        { title: "Industry Reports" },
+        { title: "Global Research" },
+      ],
+      content: {
+        heading: "Insights that Empower",
+        text: `Discover stories, reports, and thought leadership from MyBrand that help businesses transform with technology.`,
+        button: "Read Insights",
+      },
+    },
+  },
+  {
+    label: "Careers",
+    id: "careers",
+    dropdown: {
+      categories: [
+        { title: "Shape the Future" },
+        {
+          title: "India",
+          submenu: ["India"],
+        },
+        {
+          title: "Americas",
+          submenu: [
+            "Argentina",
+            "Brazil",
+            "Canada",
+            "Chile",
+            "Colombia",
+            "Ecuador",
+            "Mexico",
+            "Peru",
+            "Uruguay",
+            "USA",
+          ],
+        },
+        {
+          title: "Asia Pacific",
+          submenu: [
+            "Australia",
+            "Mainland China",
+            "Hong Kong SAR",
+            "Indonesia",
+            "Japan",
+            "Malaysia",
+            "New Zealand",
+            "Philippines",
+            "Republic of Korea",
+            "Singapore",
+            "Chinese Taipei",
+            "Thailand",
+          ],
+        },
+        {
+          title: "Europe and UK",
+          submenu: [
+            "Belgium",
+            "Denmark",
+            "Estonia",
+            "Finland",
+            "France",
+            "Germany",
+            "Hungary",
+            "Ireland",
+            "Italy",
+            "Luxembourg",
+            "Netherlands",
+            "Norway",
+            "Poland",
+            "Portugal",
+            "Spain",
+            "Sweden",
+            "Switzerland",
+            "United Kingdom",
+          ],
+        },
+        {
+          title: "Middle East and Africa",
+          submenu: [
+            "Bahrain",
+            "Israel",
+            "Kuwait",
+            "Qatar",
+            "Saudi Arabia",
+            "South Africa",
+            "United Arab Emirates",
+          ],
+        },
+      ],
+      content: {
+        heading: "Grow with MyBrand",
+        text: `Join us in shaping the future of business and technology while building your career path with global opportunities.`,
+        button: "Explore Careers",
+      },
+    },
+  },
+  {
+    label: "Newsroom",
+    id: "newsroom",
+    dropdown: {
+      categories: [
+        { title: "Press Releases" },
+        { title: "Media Kit" },
+        { title: "MyBrand in News" },
+      ],
+      content: {
+        heading: "Latest Stories",
+        text: `Stay updated with the latest news, announcements, and highlights from MyBrand worldwide.`,
+        button: "Visit Newsroom",
+      },
+    },
+  },
+  {
+    label: "Investors",
+    id: "investors",
+    dropdown: {
+      categories: [
+        { title: "Investor Relations" },
+        {
+          title: "Financial Reports",
+          submenu: ["Latest Quarter Commentary", "Annual Report Section"],
+        },
+        {
+          title: "Events & Commentary",
+          submenu: [
+            "Quarterly Earnings Reports",
+            "Download Data Sheet",
+            "Archived Financials",
+          ],
+        },
+        {
+          title: "Sustainability & ESG",
+          submenu: ["Press Releases", "Corporate Actions", "Events", "Calendar"],
+        },
+        {
+          title: "Resources",
+          submenu: [
+            "Investor FAQs",
+            "Tax & Compliance",
+            "Stock Information",
+            "Analyst Coverage",
+            "Subsidiaries",
+            "Subscribe to Investor Updates",
+            "Unclaimed Dividend Info",
+          ],
+        },
+      ],
+      content: {
+        custom: (
+          <div className="flex flex-col gap-4">
+            {/* Stock card */}
+            <div className="border border-gray-600 rounded-md flex">
+              <div className="w-1/2 p-4 border-r border-gray-700">
+                <p className="text-sm font-medium">MyBrand Limited</p>
+                <p className="text-xs text-gray-400">NSE:MYBRAND</p>
+              </div>
+              <div className="w-1/2 p-4 text-right">
+                <p className="text-xl font-bold">
+                  1,250.75 <span className="text-sm">INR</span>
+                </p>
+                <p className="text-green-400 text-sm">+8.20 (0.65%) ↑</p>
+              </div>
+            </div>
+            {/* Buttons */}
+            <div className="flex items-center gap-6">
+              <button className="px-4 py-2 rounded-full border border-gray-400 hover:bg-white hover:text-black">
+                Discover more
+              </button>
+              <a href="#" className="text-sm underline hover:text-gray-300">
+                Q1FY26 Report
+              </a>
+            </div>
+          </div>
+        ),
+      },
+    },
+  },
+];
+
+
+
+/**
+ * Hook: Outside click handler
+ */
+function useOnClickOutside(ref, handler) {
+  useEffect(() => {
+    const listener = (event) => {
+      if (!ref.current || ref.current.contains(event.target)) return;
+      handler(event);
+    };
+    document.addEventListener("mousedown", listener);
+    document.addEventListener("touchstart", listener);
+    return () => {
+      document.removeEventListener("mousedown", listener);
+      document.removeEventListener("touchstart", listener);
+    };
+  }, [ref, handler]);
+}
+
+/**
+ * Navbar Component
+ */
+export default function TcsNavbar() {
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState(null);
+  const dropdownRef = useRef(null);
+
+  useOnClickOutside(dropdownRef, () => setActiveDropdown(null));
+
   return (
-    <Link
-      to={to}
-      className={`${tokens.typography.link} ${tokens.colors.neutral} ${tokens.colors.hover} 
-        transition focus:outline-none focus:ring-2 flex focus:ring-offset-2`}
-    >
-      {children}
-    </Link>
-  );
-};
-
-const Navbar = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [openDropdown, setOpenDropdown] = useState(null);
-  const { tokens, theme, toggleTheme } = useTheme();
-
-  return (
-    <nav
-      className={`sticky top-0 z-50 backdrop-blur-md 
-        ${tokens.colors.surface} ${tokens.colors.border} ${tokens.shadow.md}`}
-    >
-      <div className={`max-w-7xl mx-auto ${tokens.spacing.container}`}>
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <Link
-            to="/"
-            className={`${tokens.typography.brand} flex text-3xl space-x-3 bg-clip-text  ${tokens.colors.primary}`}
-          >
-            <img src={logo} alt="logo" className="size-12 rounded-full" />
-            <span className="text-3xl font-bold my-1 bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">
-              MyBrand
+    <header className="sticky top-0 z-50 bg-slate-900 text-white">
+      <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex h-16 items-center justify-between">
+          {/* Left: Logo */}
+          <a href="#" className="flex items-center gap-2">
+            <img src={logo} alt="TCS" className="size-9 rounded-full  " />
+            <span className="hidden sm:block text-2xl font-serif uppercase tracking-widest">
+             MyBrand
             </span>
-          </Link>
+          </a>
 
-          {/* Desktop Navigation */}
-          <div className={`hidden md:flex items-center ${tokens.spacing.gap}`}>
-            {/* Home Dropdown */}
-            <div className="relative ">
-              <button
-                onClick={() =>
-                  setOpenDropdown(openDropdown === "home" ? null : "home")
-                }
-                className="flex items-center gap-1 cursor-pointer focus:outline-none"
-              >
-                Home <FaChevronDown size={14} />
-              </button>
-
-              {openDropdown === "home" && (
-                <div
-                  className={`absolute top-6 left-0  w-40 rounded-xl overflow-hidden border space-y-2 
-      border-gray-300 dark:border-gray-700
-      ${tokens.colors.surface} ${tokens.shadow.md}`}
+          {/* Desktop Nav */}
+          <div className="hidden lg:flex  gap-6 text-gray-200 relative">
+            {NAV_LINKS.map((link) => (
+              <div key={link.id} className="relative">
+                <button
+                  onClick={() =>
+                    setActiveDropdown(
+                      activeDropdown === link.id ? null : link.id
+                    )
+                  }
+                  className="flex items-center gap-1 text-sm font-medium hover:text-gray-700"
                 >
-                  <NavLink
-                    to="/dashboard"
-                    className=" items-center justify-around gap-2 px-4 py-2 text-sm hover:bg-gray-100 
-                 dark:hover:bg-gray-800 transition-colors"
-                  >
-                    <CiHome className="text-lg" />
-                    <span>Dashboard</span>
-                  </NavLink>
+                  {link.label}
+                  {link.dropdown && <ChevronDown className="h-3 w-3" />}
+                </button>
 
-                  <NavLink
-                    to="/highlights"
-                    className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100 
-                 dark:hover:bg-gray-800 transition-colors"
-                  >
-                    <CgProfile className="text-lg" />
-                    <span>Profile</span>
-                  </NavLink>
+                {/* Dropdown */}
+                <AnimatePresence>
+                  {activeDropdown === link.id && link.dropdown && (
+                    <motion.div
+                      ref={dropdownRef}
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="absolute mt-5 w-[1000px] h-[100vh] ml-0 bg-slate-900  shadow-lg rounded-lg flex overflow-hidden"
+                    >
+                      {/* Left column */}
+                      <div >
+                        {link.dropdown.categories.map((cat) => (
+                          <div
+                            key={cat.title}
+                            className="group relative flex items-center justify-between px-4 py-2 hover:bg-gray-800 cursor-pointer"
+                          >
+                            {cat.title}
+                            {cat.submenu && (
+                              <FaChevronRight className="h-3 w-3" />
+                            )}
+                            {cat.submenu && (
+                              <div className="absolute  left-full w-[1000px] hidden group-hover:block ">
+                                <div className="grid grid-cols-2 gap-3 px-9">
+                                  {cat.submenu.map((item) => (
+                                    <div
+                                      key={item}
+                                      className="px-2 py-1 text-sm hover:bg-slate-800 cursor-pointer rounded"
+                                    >
+                                      {item}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
 
-                  <NavLink
-                    to="/updates"
-                    className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100 
-                 dark:hover:bg-gray-800 transition-colors"
-                  >
-                    <MdOutlineSettings className="text-lg" />
-                    <span>Settings</span>
-                  </NavLink>
-                </div>
-              )}
-            </div>
-
-            {/* About Dropdown */}
-            <div className="relative ">
-              <button
-                onClick={() =>
-                  setOpenDropdown(openDropdown === "about" ? null : "about")
-                }
-                className="flex items-center gap-1 cursor-pointer focus:outline-none"
-              >
-                About <FaChevronDown size={14} />
-              </button>
-              {openDropdown === "about" && (
-                <div
-                  className={`absolute top-6 left-0  w-40 rounded-xl overflow-hidden border space-y-2 
-      border-gray-300 dark:border-gray-700
-                    ${tokens.colors.surface} ${tokens.shadow.md} ${tokens.radius.md}`}
-                >
-                  <NavLink
-                    to="/about/team"
-                    className=" items-center justify-around gap-4 px-4 py-2 text-sm hover:bg-gray-100 
-                 dark:hover:bg-gray-800 transition-colors"
-                  >
-                    {" "}
-                    <CiHome className="text-lg " />
-                    Our Team
-                  </NavLink>
-                  <NavLink to="/about/mission">
-                    {" "}
-                    <CgProfile className="my-1" />
-                    Our Story
-                  </NavLink>
-                  <NavLink to="/about/vision">
-                    <MdOutlineSettings className="my-1" />
-                    Mission & Vision
-                  </NavLink>
-                </div>
-              )}
-            </div>
-
-            {/* Services Dropdown */}
-            <div className="relative">
-              <button
-                onClick={() =>
-                  setOpenDropdown(
-                    openDropdown === "services" ? null : "services"
-                  )
-                }
-                className="flex cursor-pointer  items-center gap-1 focus:outline-none"
-              >
-                Services <FaChevronDown size={14} />
-              </button>
-              {openDropdown === "services" && (
-                <div
-                  className={`absolute top-8 left-0 w-44 p-2 space-y-2 
-                    ${tokens.colors.surface} ${tokens.shadow.md} ${tokens.radius.md}`}
-                >
-                  <NavLink to="/services/web">
-                    <CiHome className=" size-5" />
-                    Web Development
-                  </NavLink>
-                  <NavLink to="/services/app">
-                    <CgProfile className=" size-5" />
-                    UI/UX Design
-                  </NavLink>
-                  <NavLink to="/services/seo">
-                    <MdOutlineSettings className=" size-5" />
-                    Consulting
-                  </NavLink>
-                </div>
-              )}
-            </div>
-
-            {/* Contact Dropdown */}
-            <div className="relative">
-              <button
-                onClick={() =>
-                  setOpenDropdown(openDropdown === "contact" ? null : "contact")
-                }
-                className="flex items-center gap-1 cursor-pointer focus:outline-none"
-              >
-                Contact <FaChevronDown size={14} />
-              </button>
-              {openDropdown === "contact" && (
-                <div
-                  className={`absolute top-8 left-0 w-40 p-2 space-y-2 
-                    ${tokens.colors.surface} ${tokens.shadow.md} ${tokens.radius.md}`}
-                >
-                  <NavLink to="/contact/support">
-                    <CgProfile className=" size-5 " />
-                    Get in Touch
-                  </NavLink>
-                  <NavLink to="/contact/sales">
-                    <CiHome className=" size-5" />
-                    Office Location
-                  </NavLink>
-                  <NavLink to="/contact/careers">
-                    <MdOutlineSettings className=" size-5 my-1" />
-                    Support
-                  </NavLink>
-                </div>
-              )}
-            </div>
-
-            {/* Search Input */}
-            <input
-              type="text"
-              placeholder="Search..."
-              className="ml-4 px-3 py-1 rounded border-1 border-gray-100 focus:outline-none  focus:ring-offset-2"
-            />
-
-            {/* Theme Switcher */}
-            <button
-              onClick={toggleTheme}
-              className="ml-3 p-2 rounded focus:outline-none focus:ring-offset-2 cursor-pointer"
-            >
-              {theme === "light" ? (
-                <FaMoon size={24} />
-              ) : (
-                <IoSunnyOutline size={24} />
-              )}
-            </button>
+                    
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ))}
           </div>
 
-          {/* Mobile Menu Button */}
-          <div className="md:hidden">
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              aria-label="Toggle Menu"
-              className="focus:outline-none focus:ring-2 focus:ring-offset-2 rounded"
+          {/* Right: Contact + Search */}
+          <div className="flex items-center gap-4">
+            <a
+              href="#contact"
+              className="hidden md:inline text-xs tracking-widest uppercase hover:text-gray-300"
             >
-              {isOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
+              Contact Us
+            </a>
+            <button className="p-2 hover:text-gray-300" aria-label="Search">
+              <Search className="h-4 w-4" />
+            </button>
+            <div className="block">
+            <img
+              src={brand}
+              alt="brand"
+              className="size-9 rounded-full ml-2"
+            />
+            <span className="hidden sm:block text-md font-serif uppercase tracking-widest">
+             Brand
+            </span>
+
+            </div>
+
+
+            {/* Mobile Toggle */}
+            <button
+              className="lg:hidden inline-flex items-center justify-center rounded-xl border border-gray-700 p-2"
+              onClick={() => setMobileOpen((o) => !o)}
+            >
+              {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
             </button>
           </div>
         </div>
-
-        {/* Mobile Navigation */}
-        {isOpen && (
-          <div
-            className={`md:hidden mt-2 p-4 space-y-3 
-              ${tokens.colors.surface} ${tokens.radius.md} ${tokens.shadow.md}`}
-          >
-            {/* Home Dropdown */}
-            <div>
-              <button
-                onClick={() =>
-                  setOpenDropdown(openDropdown === "home" ? null : "home")
-                }
-                className="w-full cursor-pointer flex justify-between items-center"
-              >
-                Home <FaChevronDown size={14} />
-              </button>
-              {openDropdown === "home" && (
-                <div className="ml-4 mt-2 space-y-2">
-                  <NavLink to="/dashboard">
-                    <CiHome className=" size-5 " />
-                    Dashboard
-                  </NavLink>
-                  <NavLink to="/profile">
-                    <CgProfile className=" size-5 " />
-                    Profile
-                  </NavLink>
-                  <NavLink to="/settings">
-                    <MdOutlineSettings className=" size-5 " />
-                    Settings
-                  </NavLink>
-                </div>
-              )}
-            </div>
-
-            {/* About Dropdown */}
-            <div>
-              <button
-                onClick={() =>
-                  setOpenDropdown(openDropdown === "about" ? null : "about")
-                }
-                className="w-full cursor-pointer flex justify-between items-center"
-              >
-                About <FaChevronDown size={14} />
-              </button>
-              {openDropdown === "about" && (
-                <div className="ml-4 mt-2 space-y-2">
-                  <NavLink to="/about/team">
-                    <CiHome className=" size-5 " />
-                    Our Team
-                  </NavLink>
-                  <NavLink to="/about/story">
-                    <CgProfile className=" size-5 " />
-                    Our Story
-                  </NavLink>
-                  <NavLink to="/about/mission">
-                    <MdOutlineSettings className=" size-5 " />
-                    Mission & Vision
-                  </NavLink>
-                </div>
-              )}
-            </div>
-
-            {/* Services Dropdown */}
-            <div>
-              <button
-                onClick={() =>
-                  setOpenDropdown(
-                    openDropdown === "services" ? null : "services"
-                  )
-                }
-                className="w-full cursor-pointer flex justify-between items-center"
-              >
-                Services <FaChevronDown size={14} />
-              </button>
-              {openDropdown === "services" && (
-                <div className="ml-4 mt-2 space-y-2">
-                  <NavLink to="/services/web">
-                    <CiHome className=" size-5 " />
-                    Web Development
-                  </NavLink>
-                  <NavLink to="/services/app">
-                    <CgProfile className=" size-5 " />
-                    UI/UX Design
-                  </NavLink>
-                  <NavLink to="/services/seo">
-                    <MdOutlineSettings className=" size-5 " />
-                    Consulting
-                  </NavLink>
-                </div>
-              )}
-            </div>
-
-            {/* Contact Dropdown */}
-            <div>
-              <button
-                onClick={() =>
-                  setOpenDropdown(openDropdown === "contact" ? null : "contact")
-                }
-                className="w-full flex cursor-pointer justify-between items-center"
-              >
-                Contact <FaChevronDown size={14} />
-              </button>
-              {openDropdown === "contact" && (
-                <div className="ml-4 mt-2 space-y-2">
-                  <NavLink to="/contact/support">
-                    <CiHome className=" size-5 " />
-                    Get in Touch
-                  </NavLink>
-                  <NavLink to="/contact/sales">
-                    {" "}
-                    <CgProfile className=" size-5 " />
-                    Office Location
-                  </NavLink>
-                  <NavLink to="/contact/careers">
-                    <MdOutlineSettings className=" size-5 " />
-                    Support
-                  </NavLink>
-                </div>
-              )}
-            </div>
-
-            {/* Mobile Search Input */}
-            <input
-              type="text"
-              placeholder="Search..."
-              className="w-full px-3 py-2 rounded border focus:outline-none focus:ring-2 focus:ring-offset-2"
-            />
-
-            {/* Mobile Theme Switcher */}
-            <button
-              onClick={toggleTheme}
-              className="mt-2 w-full px-4 py-2 rounded border text-sm"
-            >
-              {theme === "light"
-                ? "Switch to Dark Mode"
-                : "Switch to Light Mode"}
-            </button>
-          </div>
-        )}
-      </div>
-    </nav>
+      </nav>
+    </header>
   );
-};
-
-export default Navbar;
+}

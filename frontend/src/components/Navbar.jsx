@@ -1,7 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import brand from "../assets/brand.png"
-import logo from "../assets/logo.jpeg";
 import {
   FaBars as Menu,
   FaTimes as X,
@@ -10,14 +8,12 @@ import {
   FaChevronRight,
 } from "react-icons/fa";
 
-
 //  NAVIGATION DATA
- 
 
 const NAV_LINKS = [
   {
-    label: "What we do",
-    id: "what-we-do",
+    label: "BrandAlpha",
+    id: "BrandAlpha",
     dropdown: {
       categories: [
         {
@@ -88,8 +84,8 @@ const NAV_LINKS = [
     },
   },
   {
-    label: "Who we are",
-    id: "who-we-are",
+    label: "TechNova",
+    id: "TechNova",
     dropdown: {
       categories: [
         { title: "About MyBrand" },
@@ -108,8 +104,8 @@ const NAV_LINKS = [
     },
   },
   {
-    label: "Insights",
-    id: "insights",
+    label: "InnoSphere",
+    id: "InnoSphere",
     dropdown: {
       categories: [
         { title: "Case Studies" },
@@ -210,8 +206,8 @@ const NAV_LINKS = [
     },
   },
   {
-    label: "Newsroom",
-    id: "newsroom",
+    label: "FutureEdge",
+    id: "FutureEdge",
     dropdown: {
       categories: [
         { title: "Press Releases" },
@@ -245,7 +241,12 @@ const NAV_LINKS = [
         },
         {
           title: "Sustainability & ESG",
-          submenu: ["Press Releases", "Corporate Actions", "Events", "Calendar"],
+          submenu: [
+            "Press Releases",
+            "Corporate Actions",
+            "Events",
+            "Calendar",
+          ],
         },
         {
           title: "Resources",
@@ -292,8 +293,6 @@ const NAV_LINKS = [
   },
 ];
 
-
-
 /**
  * Hook: Outside click handler
  */
@@ -328,9 +327,8 @@ export default function TcsNavbar() {
         <div className="flex h-16 items-center justify-between">
           {/* Left: Logo */}
           <a href="#" className="flex items-center gap-2">
-            <img src={logo} alt="TCS" className="size-9 rounded-full  " />
             <span className="hidden sm:block text-2xl font-serif uppercase tracking-widest">
-             MyBrand
+              MyBrand
             </span>
           </a>
 
@@ -361,7 +359,7 @@ export default function TcsNavbar() {
                       className="absolute mt-5 w-[1000px] h-[100vh] ml-0 bg-slate-900  shadow-lg rounded-lg flex overflow-hidden"
                     >
                       {/* Left column */}
-                      <div >
+                      <div>
                         {link.dropdown.categories.map((cat) => (
                           <div
                             key={cat.title}
@@ -388,8 +386,6 @@ export default function TcsNavbar() {
                           </div>
                         ))}
                       </div>
-
-                    
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -409,25 +405,94 @@ export default function TcsNavbar() {
               <Search className="h-4 w-4" />
             </button>
             <div className="block">
-            <img
-              src={brand}
-              alt="brand"
-              className="size-9 rounded-full ml-2"
-            />
-            <span className="hidden sm:block text-md font-serif uppercase tracking-widest">
-             Brand
-            </span>
-
+              <span className="hidden sm:block text-md font-serif uppercase tracking-widest">
+                Brand
+              </span>
             </div>
 
-
-            {/* Mobile Toggle */}
+            {/* Mobile Menu Toggle */}
             <button
               className="lg:hidden inline-flex items-center justify-center rounded-xl border border-gray-700 p-2"
               onClick={() => setMobileOpen((o) => !o)}
             >
-              {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+              {mobileOpen ? (
+                <X className="h-5 w-5" />
+              ) : (
+                <Menu className="h-5 w-5" />
+              )}
             </button>
+
+            {/* Mobile Menu */}
+            <AnimatePresence>
+              {mobileOpen && (
+                <motion.div
+                  initial={{ x: "100%" }}
+                  animate={{ x: 0 }}
+                  exit={{ x: "100%" }}
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  className="fixed right-0 top-14 w-full h-full bg-slate-900 text-gray-200 p-6 shadow-2xl flex flex-col gap-4 overflow-y-auto"
+                >
+                  {NAV_LINKS.map((link) => (
+                    <div
+                      key={link.id}
+                      className="border-b border-gray-700 pb-3"
+                    >
+                      {/* Main Menu Button */}
+                      <button
+                        onClick={() =>
+                          setActiveDropdown(
+                            activeDropdown === link.id ? null : link.id
+                          )
+                        }
+                        className="flex items-center justify-between w-full text-left font-medium hover:text-white transition-colors"
+                      >
+                        {link.label}
+                        {link.dropdown && (
+                          <motion.span
+                            animate={{
+                              // rotate: activeDropdown === link.id ? 90 : 0,
+                            }}
+                            className="inline-block"
+                          >
+                            <ChevronDown className="h-4 w-4" />
+                          </motion.span>
+                        )}
+                      </button>
+
+                      {/* Submenu Accordion */}
+                      {activeDropdown === link.id && link.dropdown && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          className="pl-4 mt-2 flex flex-col gap-2"
+                        >
+                          {link.dropdown.categories.map((cat) => (
+                            <div key={cat.title}>
+                              <p className="text-sm font-semibold text-gray-300">
+                                {cat.title}
+                              </p>
+                              {cat.submenu && (
+                                <ul className="pl-3 mt-1 flex flex-col gap-1">
+                                  {cat.submenu.map((item) => (
+                                    <li
+                                      key={item}
+                                      className="text-gray-400 text-sm hover:text-white cursor-pointer transition-colors"
+                                    >
+                                      {item}
+                                    </li>
+                                  ))}
+                                </ul>
+                              )}
+                            </div>
+                          ))}
+                        </motion.div>
+                      )}
+                    </div>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </nav>
